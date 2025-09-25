@@ -23,12 +23,12 @@ pyscript: !include pyscript/config.yaml
 ### (2) Download hml_lights.py
 
 Download **hml_lights.py** to the **scripts** folder you just created. You can do this
-with [github](https://github.com/EdDuran/script-set-light-hml) or from a HA Terminal
+with [github](https://github.com/EdDuran/script-hml-lights) or from a HA Terminal
 ```
 cd /tmp
 wget https://github.com/EdDuran/HA-pyscript-set-light-hml/archive/refs/heads/main.zip
 unzip main.zip
-cp HA-pyscript-set-light-hml-main/hml_lights.py /config/pyscript/scripts
+cp HA-pyscript-script-hml-lights-main/hml_lights.py /config/pyscript/scripts
 ```
 When the **hml_lights.py** script runs for the _first time_, a demo **/config/hml_lights_config.yaml**
 file will be created automatically. This demo config file contains an ***HML Entity*** and ***Light Entities***
