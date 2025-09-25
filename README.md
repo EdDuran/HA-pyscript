@@ -81,8 +81,8 @@ light_data:
 ```
 hml_data:
   input_select.hml_bedroom:    # HML Entity which will be watched for changes
-  - light.left_nightstand      # List of Light Entities to Set
-  - light.right_nightstand
+    - light.left_nightstand    # List of Light Entities to Set
+    - light.right_nightstand
 
 light_data:
   light.left_nightstand:       # Light Entity to Set
