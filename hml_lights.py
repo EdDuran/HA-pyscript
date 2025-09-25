@@ -1,6 +1,8 @@
 """
 hml_lights.py
-v1.0.0.0
+v1.1.0.0
+Keith Roberts
+Strebor Tech, September 2025
 
 Set Light HML (High/Medium/Low) - PyScript Version
 This script adjusts light brightness based on HML input_select Helper values.
@@ -18,9 +20,6 @@ brightness values) you simply reload pyscript from Developer Tools -> YAML
 
 It seems the Home Assistant Logger buffers output, so log messages do not appear as
 readily as one would hope.
-
-Keith Roberts
-Strebor Tech, September 2025
 """
 
 import aiofiles
@@ -54,8 +53,8 @@ def create_hml_config():
 #
 hml_data:
   input_select.test_hml1:   # HML Entity which will be watched for changes
-  - light.test_light1       # List of Light Entities to Set
-  - light.test_light2
+    - light.test_light1     # List of Light Entities to Set
+    - light.test_light2
 
 light_data:
   light.test_light1:        # Light Entity to Set
@@ -121,6 +120,11 @@ def validate_config(hml_data, light_data):
             missing_keys = required_keys - set(light_hml_map.keys())
             if missing_keys:
                 raise HMLConfigException(f"'light_data:' for [{light_entity}] is missing the required HML keys: {list(missing_keys)}")
+
+            # Check for Brightness values between 0 and 100 percent
+            for key, brightness in light_hml_map.items():
+                if (brightness < 0 or brightness > 100):
+                    log.warning(f"'light_data:' for [{light_entity}.{key} brightness out of range [0 <= {brightness} <= 100]")
             
             referenced_lights.add(light_entity)
 
@@ -225,7 +229,7 @@ def set_light_hml(hml_entity=None, **kwargs):
     Typically this method is called automatically by the state_trigger, however, can
     be called manually for testing purposes
     """
-    log.info(f"HML Entity = [{hml_entity}]")
+    #log.info(f"HML Entity = [{hml_entity}]")
 
     # Validate input Entity
     if not hml_entity:
@@ -270,6 +274,11 @@ def set_light_hml(hml_entity=None, **kwargs):
             if brightness is None:
                 log.warning(f"set_hml_light: No brightness setting for [{light_entity}.{hml_state}]. Check [{HML_CONFIG_FILE}]")
                 continue
+
+            if (brightness < 0 or brightness > 100):
+                adj_brightness = max(0, min(brightness, 100))
+                log.warning(f"'light_data:' for [{light_entity}.{hml_state} brightness out of range [0 <= {brightness} <= 100], using [{adj_brightness}] instead")
+                brightness = adj_brightness
 
             #log.info(f"set_hml_light: Setting [{light_entity}.{hml_state}] brightness to {brightness}%")
             
