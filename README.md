@@ -111,10 +111,12 @@ Check the **Settings -> System -> Log** after rebooting
 
 The hml_lights.py script validates the config data when the script is loaded. This ensures
 that:
-- the file is formatted properly,
-- the HML -> Light references match,
-- contains the required HML values, and
-- that the HML and Light Entities exist.
+- The hml_data and light_data are formatted properly,
+- The HML -> Light references match,
+- The HML and Light Entities exist.
+- The Light Entities contain the required HML values (off, low, medium and high),
+- The Light Entities brightness values are in the range of 0 to 100 percent
+  - Out of range values produce a warning and default to Min(0) and Max(100)
 
 Should the config file validation fail, the script writes to the HA System Log - for example:
 
