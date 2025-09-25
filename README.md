@@ -19,6 +19,11 @@ Then, add to your **/config/configuration.yaml**
 ```
 pyscript: !include pyscript/config.yaml
 ```
+And to see Script logging, you'll also need to add this to your configuration.yaml
+```
+logger:
+  default: info
+```
 
 ### (2) Download hml_lights.py
 
@@ -65,7 +70,10 @@ The **/config/hml_lights_config.yaml** file contains two sections:
 The pyscript integration loads hml_lights.py when HA is started.
 
 When making changes to the hml_lights_config.yaml file (adding or removing Entities or adjusting
-brightness values) you will need to reload pyscript from: **Developer Tools -> YAML -> Pyscript Python scripting**
+brightness values) you will need to reload the hml config file with ***Developer Tools -> Actions***
+```
+action: pyscript.load_hml_lights_config
+```
 
 **Note:** The Home Assistant Logger buffers output, so log messages do not appear as readily as one would hope.
 
@@ -102,7 +110,7 @@ light_data:
 
 **Making changes to the hml_lights_config.yaml**
 
-Changes to the config file requires reloading YAML: **Developer Tools -> YAML -> Pyscript Python scripting**  
+Changes to the config file requires reloading YAML: **Developer Tools -> Actions -> pyscript.load_hml_lights_config**  
 However that doesn't always seem to do the trick, and thus restarting HA could be required.  
 Check the **Settings -> System -> Log** after rebooting
 
