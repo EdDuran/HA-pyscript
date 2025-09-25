@@ -30,7 +30,7 @@ wget https://github.com/EdDuran/HA-pyscript/archive/refs/heads/main.zip
 unzip main.zip
 mv HA-pyscript-main/hml_lights.py /config/pyscript/scripts
 ```
-When the **hml_lights.py** script runs for the _first time_, a default **/config/hml_lights_config.yaml**
+When the **hml_lights.py** script runs for the _first time_, a demo **/config/hml_lights_config.yaml**
 file will be created automatically. This demo config file contains an ***HML Entity*** and ***Light Entities***
 which do not exist on your system, and thereby errors are loggedd. The config file needs to be edited
 (see 4 below) for your individual system.
@@ -65,7 +65,7 @@ The **/config/hml_lights_config.yaml** file contains two sections:
 The pyscript integration loads hml_lights.py when HA is started.
 
 When making changes to the hml_lights_config.yaml file (adding or removing Entities or adjusting
-brightness values) you will need to reload pyscript from: **Developer Tools -> YAML -> pyscript**
+brightness values) you will need to reload pyscript from: **Developer Tools -> YAML -> Pyscript Python scripting**
 
 **Note:** The Home Assistant Logger buffers output, so log messages do not appear as readily as one would hope.
 
@@ -100,6 +100,15 @@ light_data:
 
 ### Troublshooting
 
+**Making changes to the hml_lights_config.yaml**
+
+Changes to the config file requires reloading YAML: **Developer Tools -> YAML -> Pyscript Python scripting**  
+However that doesn't always seem to do the trick, and thus restarting HA could be required.  
+Check the **Settings -> System -> Log** after rebooting
+
+
+**Validation of hml_lights_config.yaml**
+
 The hml_lights.py script validates the config data when the script is loaded. This ensures
 that:
 - the file is formatted properly,
@@ -109,9 +118,9 @@ that:
 
 Should the config file validation fail, the script writes to the HA System Log - for example:
 
-***When the script creates the demo hml_lights_config.yaml***
+When the script creates the demo hml_lights_config.yaml
 ```
-2025-09-24 19:04:30.873 WARNING (MainThread) [custom_components.pyscript.scripts.hml_lights] Created default [/config/hml_lights_config.yaml]; please edit with your data
+2025-09-24 19:04:30.873 WARNING (MainThread) [custom_components.pyscript.scripts.hml_lights] Created demo [/config/hml_lights_config.yaml]; please edit with your data
 2025-09-24 19:04:30.893 ERROR (MainThread) [custom_components.pyscript.scripts.hml_lights] load_hml_config: Failed to Validate [/config/hml_lights_config.yaml]: The HML Entity Helper [input_select.test_hml1] does not exist
 2025-09-24 19:04:30.893 ERROR (MainThread) [custom_components.pyscript.scripts.hml_lights] Failed to create State Triggers; No HML Entities found, please check [/config/hml_lights_config.yaml]
 ```
