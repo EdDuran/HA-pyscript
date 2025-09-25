@@ -1,6 +1,6 @@
 """
 hml_lights.py
-v1.1.0.0
+v1.2.0.0
 Keith Roberts
 Strebor Tech, September 2025
 
@@ -16,7 +16,7 @@ When this script is loaded, the hml_lights_config.yaml is read and triggers auto
 created .. that is, no need to create individual Automations, this script does it.
 
 If making changes to the hml_lights_config.yaml file (adding or removing Entities or adjusting
-brightness values) you simply reload pyscript from Developer Tools -> YAML
+brightness values) use Developer Tools -> Actions -> pyscript.load_hml_lights_config
 
 It seems the Home Assistant Logger buffers output, so log messages do not appear as
 readily as one would hope.
@@ -174,46 +174,68 @@ def load_hml_config():
         log.error(f"load_hml_config: Unexpected Error while Loading HML Config: {e}")
         return {}, {}
 
-#
-# ----- Main -----
-#
-# Load HML configuration at script load-time and store in globals
-#
-HML_DATA, LIGHT_DATA = load_hml_config()
-hml_entities = list(HML_DATA.keys())
+@time_trigger("startup")
+def time_trigger_startup():
+    """
+    Home Assistant Startup - Load HML Lights Config
+    """
+    log.info("hml_lights: time_trigger_startup")
+    _load_hml_lights_config()
+
+@service
+def load_hml_lights_config():
+    """
+    Reload HML Lights Config
+    """
+    log.info("hml_lights: Service -> load_hml_lights_config")
+    _load_hml_lights_config()
 
 #
-# Dynamically create State Triggers for the HML Entities
+# ----- load_hml_lights_config -----
 #
-if hml_entities:
-    log.info(f"Created State Triggers for HML Entities: [{hml_entities}]")
-    #
-    # ----- State_Trigger -----
-    #
-    # Create the state trigger decorator for the loaded hml_entities
-    # This method is called whenever one of the HML Entities value changes
-    #
-    @state_trigger(*hml_entities)
-    def hml_state_changed(**kwargs):
-        """
-        Automatically called when any HML input_select Entity changes state.
-        Entities are dynamically loaded from hml_lights_config.yaml at pyscript load time.
-        
-        Note: If you modify hml_lights_config.yaml, reload pyscript via:
-        Developer Tools -> YAML -> "Pyscript python scripting"
-        """
+# Load HML configuration at script Home Assistant Startup, and when
+# invoked by a Service call.
+#
+def _load_hml_lights_config():
+    """
+    Load HML Lights Config
+    """
 
-        # Get the entity that triggered - pyscript uses 'var_name'
-        trigger_entity = kwargs.get('var_name')
-        new_value = kwargs.get('value')
-        old_value = kwargs.get('old_value')
+    HML_DATA, LIGHT_DATA = load_hml_config()
+    hml_entities = list(HML_DATA.keys())
 
-        if trigger_entity:
-            set_light_hml(hml_entity=trigger_entity)
-        else:
-            log.warning("Failed to determine which entity triggered the HML change")
-else:
-    log.error(f"Failed to create State Triggers; No HML Entities found, please check [{HML_CONFIG_FILE}]")
+    #
+    # Dynamically create State Triggers for the HML Entities
+    #
+    if hml_entities:
+        log.info(f"Created State Triggers for HML Entities: [{hml_entities}]")
+        #
+        # ----- State_Trigger -----
+        #
+        # Create the state trigger decorator for the loaded hml_entities
+        # This method is called whenever one of the HML Entities value changes
+        #
+        @state_trigger(*hml_entities)
+        def hml_state_changed(**kwargs):
+            """
+            Automatically called when any HML input_select Entity changes state.
+            Entities are dynamically loaded from hml_lights_config.yaml at pyscript load time.
+            
+            Note: If you modify hml_lights_config.yaml, reload pyscript via:
+            Developer Tools -> YAML -> "Pyscript python scripting"
+            """
+
+            # Get the entity that triggered - pyscript uses 'var_name'
+            trigger_entity = kwargs.get('var_name')
+            new_value = kwargs.get('value')
+            old_value = kwargs.get('old_value')
+
+            if trigger_entity:
+                set_light_hml(hml_entity=trigger_entity)
+            else:
+                log.warning("Failed to determine which entity triggered the HML change")
+    else:
+        log.error(f"Failed to create State Triggers; No HML Entities found, please check [{HML_CONFIG_FILE}]")
 
 #
 # ----- Service: set_light_hml -----
