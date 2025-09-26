@@ -14,7 +14,7 @@ which watch the HML Entity state change, so no additional Automations are requir
 - ✅ Service calls for manual testing
 - ✅ Detailed error logging
 
-### (1) Install pyscript
+## (1) Install pyscript
 The [**pyscript**](https://hacs-pyscript.readthedocs.io/en/stable/index.html) integration
 must be installed into you Home Assistant (HA) system. Recommend you use HACS for the install.
 
@@ -27,17 +27,17 @@ hass_is_global: true
 ```
 pyscript: !include pyscript/config.yaml
 ```
-- And to see Script logging, you'll also need to a this to your configuration.yaml
+- And to see Script logging, you'll also need to add a this to your configuration.yaml
 ```
 logger:
   default: info
 ```
 - Finally, restart Home Assistant to load PyScript
 
-### (2) Download hml_lights.py
+## (2) Download hml_lights.py
 
 Download **hml_lights.py** to the **scripts** folder you just created. You can do this
-with [github](https://github.com/EdDuran/HA-pscript-hml-lights) or from a HA Terminal
+with [github](https://github.com/EdDuran/HA-pyscript-hml-lights) or from a HA Terminal
 ```
 cd /tmp
 wget https://github.com/EdDuran/HA-pyscript-hml-lights/archive/refs/heads/main.zip
@@ -49,7 +49,13 @@ file will be created automatically. This demo config file contains an ***HML Ent
 which do not exist on your system, and thereby errors are logged. The config file needs to be edited
 (see 4 below) for your individual system.
 
-### (3) Create an input_select Helper
+## (3) Quick Start
+1. Create input_select helper: `input_select.hml_bedroom` with options: off, low, medium, high
+2. Edit `/config/hml_lights_config.yaml` with your entities
+3. Restart Home Assistant or reload PyScript
+4. Test by changing your HML helper - lights should respond automatically!
+
+## (4) Create an input_select Helper
 Create an [input_select Helper](https://www.home-assistant.io/integrations/input_select/) for each Light to
 be controlled with hml_lights. Recommend that the name of the Helper begins with ***hml_*** so that they are
 easily identified, such as: ***input_select.hml_bedroom_lights*** .. and add the required values:
@@ -58,18 +64,12 @@ easily identified, such as: ***input_select.hml_bedroom_lights*** .. and add the
 - medium
 - high
 
-### (4) Configuration File
+## (5) Configuration File
 The **/config/hml_lights_config.yaml** file contains two sections:
 - **hml_data:** contains your HML Entity Helpers and a List (one-to-many) of associated Light Entities.
 - **light_data:** contains your Light Entities with a map of HML keys and brightness values (in percent).
 
 **Note:** When creating the light_data, the keyword **off** must be quoted; i.e., 'off'
-
-## Quick Start
-1. Create input_select helper: `input_select.hml_bedroom` with options: off, low, medium, high
-2. Edit `/config/hml_lights_config.yaml` with your entities
-3. Restart Home Assistant or reload PyScript
-4. Test by changing your HML helper - lights should respond automatically!
 
 ## Use Cases
 ***Multiple Light Entities***
