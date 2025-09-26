@@ -1,6 +1,6 @@
 """
 hml_lights.py
-v1.2.0.0
+v1.3.0.0
 Keith Roberts
 Strebor Tech, September 2025
 
@@ -16,7 +16,7 @@ When this script is loaded, the hml_lights_config.yaml is read and triggers auto
 created .. that is, no need to create individual Automations, this script does it.
 
 If making changes to the hml_lights_config.yaml file (adding or removing Entities or adjusting
-brightness values) use Developer Tools -> Actions -> pyscript.load_hml_lights_config
+brightness values) you simply reload pyscript from Developer Tools -> YAML
 
 It seems the Home Assistant Logger buffers output, so log messages do not appear as
 readily as one would hope.
@@ -38,7 +38,7 @@ class HMLConfigException(Exception):
 #
 # ----- Create HML Config -----
 #
-def create_hml_config():
+def _create_hml_config():
     default_config = """
 # HML (High/Medium/Low) Configuration Data
 # Place this file in your Home Assistant /config directory
@@ -78,7 +78,7 @@ light_data:
 #
 # ----- Validate HML Config Data -----
 #
-def validate_config(hml_data, light_data):
+def _validate_hml_config(hml_data, light_data):
     # hml_data exist?
     if (not hml_data or len(hml_data) == 0):
         raise HMLConfigException(f"The 'hml_data:' section is missing or empty")
@@ -133,15 +133,16 @@ def validate_config(hml_data, light_data):
     unreferenced_lights = all_lights - referenced_lights
     if unreferenced_lights:
         log.warning(f"Ignoring unreferenced 'light_data': {list(unreferenced_lights)} in [{HML_CONFIG_FILE}]")
+
 #
 # ----- Load HML Config -----
 #
-def load_hml_config():
+def _load_config():
     """Load HML configuration and return hml_data, light_data"""
     try:
         # Does HML Config exist?                
         if not os.path.exists(HML_CONFIG_FILE):
-            create_hml_config()
+            _create_hml_config()
 
         # Read and parse HML Config
         # Must use async aiofiles.open to prevent blocking I/O
@@ -152,7 +153,7 @@ def load_hml_config():
         hml_data = config.get('hml_data', {})
         light_data = config.get('light_data', {})
 
-        validate_config(hml_data, light_data)
+        _validate_hml_config(hml_data, light_data)
         
         if (hml_data):
             log.info(f"Loaded [{HML_CONFIG_FILE}] with [{len(hml_data)} HML Entities] and [{len(light_data)} Light Entities]")
@@ -174,14 +175,43 @@ def load_hml_config():
         log.error(f"load_hml_config: Unexpected Error while Loading HML Config: {e}")
         return {}, {}
 
+#
+# ----- _load_hml_lights_config -----
+#
+def _load_hml_lights_config():
+    """
+    Load HML Config into Global variables HML_DATA and LIGHT_DATA
+    """
+    global HML_DATA, LIGHT_DATA  # Only need global here because we're ASSIGNING
+
+    HML_DATA, LIGHT_DATA = _load_config()
+
+#
+# ----- startup_trigger -----
+#
 @time_trigger("startup")
-def time_trigger_startup():
+def startup_trigger():
     """
     Home Assistant Startup - Load HML Lights Config
     """
-    log.info("hml_lights: time_trigger_startup")
+    log.info("hml_lights: startup_trigger")
     _load_hml_lights_config()
 
+#
+# ----- hml_event_handler
+#
+@event_trigger("state_changed")
+def hml_event_handler(entity_id=None, old_state=None, new_state=None):
+    """
+    Listen for all state_changed events and filter for HML entities
+    """
+    if HML_DATA and entity_id and entity_id in HML_DATA:        
+        if new_state and old_state and new_state.state != old_state.state:
+            set_light_hml(hml_entity=entity_id)
+
+#
+# ----- Service: load_hml_lights_config -----
+#
 @service
 def load_hml_lights_config():
     """
@@ -189,53 +219,6 @@ def load_hml_lights_config():
     """
     log.info("hml_lights: Service -> load_hml_lights_config")
     _load_hml_lights_config()
-
-#
-# ----- load_hml_lights_config -----
-#
-# Load HML configuration at script Home Assistant Startup, and when
-# invoked by a Service call.
-#
-def _load_hml_lights_config():
-    """
-    Load HML Lights Config
-    """
-
-    HML_DATA, LIGHT_DATA = load_hml_config()
-    hml_entities = list(HML_DATA.keys())
-
-    #
-    # Dynamically create State Triggers for the HML Entities
-    #
-    if hml_entities:
-        log.info(f"Created State Triggers for HML Entities: [{hml_entities}]")
-        #
-        # ----- State_Trigger -----
-        #
-        # Create the state trigger decorator for the loaded hml_entities
-        # This method is called whenever one of the HML Entities value changes
-        #
-        @state_trigger(*hml_entities)
-        def hml_state_changed(**kwargs):
-            """
-            Automatically called when any HML input_select Entity changes state.
-            Entities are dynamically loaded from hml_lights_config.yaml at pyscript load time.
-            
-            Note: If you modify hml_lights_config.yaml, reload pyscript via:
-            Developer Tools -> YAML -> "Pyscript python scripting"
-            """
-
-            # Get the entity that triggered - pyscript uses 'var_name'
-            trigger_entity = kwargs.get('var_name')
-            new_value = kwargs.get('value')
-            old_value = kwargs.get('old_value')
-
-            if trigger_entity:
-                set_light_hml(hml_entity=trigger_entity)
-            else:
-                log.warning("Failed to determine which entity triggered the HML change")
-    else:
-        log.error(f"Failed to create State Triggers; No HML Entities found, please check [{HML_CONFIG_FILE}]")
 
 #
 # ----- Service: set_light_hml -----
