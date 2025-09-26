@@ -3,41 +3,50 @@
 **hml_lights.py** is a python script for Home Assistant that can adjust a Light Entity's
 brightness based on a High/Medium/Low (HML) value. An [input_select Helper](https://www.home-assistant.io/integrations/input_select/)
 (also called a Dropdown) is used to provide the HML values, and a yaml file describes the configuration.
-When HA starts up, pscript initializes hml_lights.py which will automatically create State Triggers
+When HA starts up, PyScript initializes hml_lights.py which will automatically create State Triggers
 which watch the HML Entity state change, so no additional Automations are required.
+
+## Features
+- ✅ Automatic trigger creation - no manual automations needed
+- ✅ Multiple lights per HML control
+- ✅ Individual brightness settings per light
+- ✅ Robust configuration validation
+- ✅ Service calls for manual testing
+- ✅ Detailed error logging
 
 ### (1) Install pyscript
 The [**pyscript**](https://hacs-pyscript.readthedocs.io/en/stable/index.html) integration
 must be installed into you Home Assistant (HA) system. Recommend you use HACS for the install.
 
-Create the folders **/config/pyscript/scripts**, then in **pyscript** create **config.yaml** with:
+- Create the folders **/config/pyscript/scripts**, then in **pyscript** create **config.yaml** with:
 ```
 allow_all_imports: true
 hass_is_global: true
 ```
-Then, add to your **/config/configuration.yaml**
+- Add to your **/config/configuration.yaml**
 ```
 pyscript: !include pyscript/config.yaml
 ```
-And to see Script logging, you'll also need to add this to your configuration.yaml
+- And to see Script logging, you'll also need to a this to your configuration.yaml
 ```
 logger:
   default: info
 ```
+- Finally, restart Home Assistant to load PyScript
 
 ### (2) Download hml_lights.py
 
 Download **hml_lights.py** to the **scripts** folder you just created. You can do this
-with [github](https://github.com/EdDuran/script-hml-lights) or from a HA Terminal
+with [github](https://github.com/EdDuran/HA-pscript-hml-lights) or from a HA Terminal
 ```
 cd /tmp
-wget https://github.com/EdDuran/HA-pyscript-set-light-hml/archive/refs/heads/main.zip
+wget https://github.com/EdDuran/HA-pyscript-hml-lights/archive/refs/heads/main.zip
 unzip main.zip
 cp HA-pyscript-hml-lights-main/hml_lights.py /config/pyscript/scripts
 ```
 When the **hml_lights.py** script runs for the _first time_, a demo **/config/hml_lights_config.yaml**
 file will be created automatically. This demo config file contains an ***HML Entity*** and ***Light Entities***
-which do not exist on your system, and thereby errors are loggedd. The config file needs to be edited
+which do not exist on your system, and thereby errors are logged. The config file needs to be edited
 (see 4 below) for your individual system.
 
 ### (3) Create an input_select Helper
@@ -56,7 +65,13 @@ The **/config/hml_lights_config.yaml** file contains two sections:
 
 **Note:** When creating the light_data, the keyword **off** must be quoted; i.e., 'off'
 
-### Use Cases
+## Quick Start
+1. Create input_select helper: `input_select.hml_bedroom` with options: off, low, medium, high
+2. Edit `/config/hml_lights_config.yaml` with your entities
+3. Restart Home Assistant or reload PyScript
+4. Test by changing your HML helper - lights should respond automatically!
+
+## Use Cases
 ***Multiple Light Entities***
 - The Lanai lights are operated by two distinct Light Entities (switches). Each bulb-set uses different LED bulbs with different brightness requirements.
 - The two Bedroom nightstands each have a zigbee bulb. Using the HML Entity, both lights can be operated in unison, as a single device.
@@ -66,8 +81,8 @@ The **/config/hml_lights_config.yaml** file contains two sections:
 - Triggers on zigbee button, toggles hml_bedroom -> low -> off
   - Bonus: button long-press cycles low -> medium -> high -> low
 
-### Loading hml_lights_config.yaml
-The pyscript integration loads hml_lights.py when HA is started.
+## Loading hml_lights_config.yaml
+The PyScript integration loads hml_lights.py when HA is started.
 
 When making changes to the hml_lights_config.yaml file (adding or removing Entities or adjusting
 brightness values) you will need to reload the hml config file with ***Developer Tools -> Actions***
@@ -79,7 +94,7 @@ action: pyscript.load_hml_lights_config
 
 -----
 
-### Sample hml_lights_config.yaml
+## Sample hml_lights_config.yaml
 
 hml_data:
 - Contains a Map(of input_select HML Helpers) -> List(of Light Entities). One HML can operate multiple Lights
@@ -106,7 +121,7 @@ light_data:
 ```
 -----
 
-### Troublshooting
+## Troubleshooting
 
 **Making changes to the hml_lights_config.yaml**
 
@@ -134,3 +149,9 @@ When the script creates the demo hml_lights_config.yaml
 2025-09-24 19:04:30.893 ERROR (MainThread) [custom_components.pyscript.scripts.hml_lights] load_hml_config: Failed to Validate [/config/hml_lights_config.yaml]: The HML Entity Helper [input_select.test_hml1] does not exist
 2025-09-24 19:04:30.893 ERROR (MainThread) [custom_components.pyscript.scripts.hml_lights] Failed to create State Triggers; No HML Entities found, please check [/config/hml_lights_config.yaml]
 ```
+
+**Script not loading/working:**
+- Check PyScript is installed and enabled
+- Verify `/config/pyscript/config.yaml` exists with correct content
+- Check Home Assistant logs for PyScript errors
+- Ensure your input_select helpers have exactly: off, low, medium, high options
