@@ -1,10 +1,10 @@
 # Set Light HML (High/Medium/Low) - for Home Assistant
 
-**hml_lights.py** is a python script for Home Assistant that can adjust a Light Entity's
+**hml_lights.py** is a python script for [Home Assistant](https://www.home-assistant.io/) that can adjust a Light Entity's
 brightness based on a High/Medium/Low (HML) value. An [input_select Helper](https://www.home-assistant.io/integrations/input_select/)
 (also called a Dropdown) is used to provide the HML values, and a yaml file describes the configuration.
-When HA starts up, PyScript initializes hml_lights.py which will automatically create State Triggers
-which watch the HML Entity state change, so no additional Automations are required.
+When HA starts up, the PyScript integration initializes hml_lights.py which automatically creates State Triggers
+to watch the HML Entity state change. No additional Automations are required 🥳
 
 ## Features
 - ✅ Automatic trigger creation - no manual automations needed
