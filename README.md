@@ -125,8 +125,10 @@ light_data:
 
 **Making changes to the hml_lights_config.yaml**
 
-Changes to the config file requires reloading YAML: **Developer Tools -> Actions -> pyscript.load_hml_lights_config**  
-However that doesn't always seem to do the trick, and thus restarting HA could be required.  
+Changes to the config file requires reloading YAML:
+- **Developer Tools -> Actions -> pyscript.load_hml_lights_config**  
+
+However that doesn't do the trick, restarting HA could be required.  
 Check the **Settings -> System -> Log** after rebooting
 
 
